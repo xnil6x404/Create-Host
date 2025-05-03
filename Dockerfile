@@ -1,23 +1,21 @@
-FROM ubuntu:14.04
+FROM ubuntu:20.04
 LABEL maintainer="wingnut0310 <wingnut0310@gmail.com>"
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
-ENV GOTTY_TAG_VER v1.0.1
+ENV GOTTY_VERSION 1.5.0
 
-RUN apt-get -y update && \
-    apt-get install -y curl && \
-    curl -sLk https://github.com/yudai/gotty/releases/download/${GOTTY_TAG_VER}/gotty_linux_amd64.tar.gz \
-    | tar xzC /usr/local/bin && \
-    apt-get purge --auto-remove -y curl && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    wget \
+    ca-certificates && \
+    wget https://github.com/sorenisanerd/gotty/releases/download/v${GOTTY_VERSION}/gotty_${GOTTY_VERSION}_linux_amd64.tar.gz -O /tmp/gotty.tar.gz && \
+    tar -C /usr/local/bin -xzf /tmp/gotty.tar.gz gotty && \
+    apt-get purge -y wget && \
+    apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists*
-
-
-COPY /run_gotty.sh /run_gotty.sh
-
-RUN chmod 744 /run_gotty.sh
+    rm -rf /var/lib/apt/lists/* /tmp/gotty.tar.gz
 
 EXPOSE 8080
 
-CMD ["/bin/bash","/run_gotty.sh"]
+CMD ["gotty", "-w", "/bin/bash"]
